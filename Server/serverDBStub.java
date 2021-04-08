@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 
-public class serverDBStub {
+public class serverDBStub implements ISender{
 
 	private Socket socket;
 	private PrintStream out;
@@ -17,9 +17,13 @@ public class serverDBStub {
 			out = new PrintStream( socket.getOutputStream() );
 			in = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 
-		}catch(Exception e){}
+		}catch(Exception e){
+			System.out.println(e);
+			this.closeSocket();
+		}
 	}
 
+	@Override
 	public void send(String data){
 
 		out.println(data);
@@ -27,31 +31,32 @@ public class serverDBStub {
 
 	}
 
+	@Override
 	public String getResponse(){
 
 		String response = "";
 		try{
 			String line = in.readLine();
 			while(line != null && !line.isEmpty()){
-				System.out.println("Line: " + line + " : " + line.isEmpty());
 				response += line + "\n";
 				line = in.readLine();
 			}
 		}catch(Exception e){
 			System.out.println(e);
+			this.closeSocket();
 		}
-		System.out.println("Resp: " + response);
 		return response;
 	}
 
-	private void close(){
+	@Override
+	public void closeSocket(){
 
 		try{
             in.close();
             out.close();
             socket.close();
 		}catch(IOException e){
-			
+			System.out.println(e);
 		}
 
 	}

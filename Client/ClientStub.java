@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 
-public class ClientStub {
+public class ClientStub implements ISender{
 
 	private Socket socket;
 	private PrintStream out;
@@ -18,16 +18,20 @@ public class ClientStub {
 			out = new PrintStream( socket.getOutputStream() );
 			in = new BufferedReader( new InputStreamReader( socket.getInputStream() ) );
 
-		}catch(Exception e){}
+		}catch(Exception e){
+			System.out.println(e);
+			this.closeSocket();
+		}
 	}
 
+	@Override
 	public void send(String data){
 
-		System.out.println("Sending: " + data);
 		out.println(data);
 
 	}
 
+	@Override
 	public String getResponse(){
 
 		String response = "";
@@ -40,18 +44,20 @@ public class ClientStub {
 			}
 		}catch(Exception e){
 			System.out.println(e);
+			this.closeSocket();
 		}
 		return response;
 	}
 
-	public void close(){
+	@Override
+	public void closeSocket(){
 
 		try{
             in.close();
             out.close();
             socket.close();
 		}catch(IOException e){
-			
+			System.out.println(e);
 		}
 
 	}

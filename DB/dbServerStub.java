@@ -4,81 +4,55 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.io.FileWriter;
 import java.util.Vector;
-import java.io.FileReader;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-public class dbServerStub{
+public class dbServerStub implements IReceiver{
 
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
 	private BufferedReader in;
 	private HashMap<String, String> map;
-	private FileWriter myWriter;
-	private BufferedReader myReader;
+	private DBInterface dbManager;
 
 	public dbServerStub(int port){
 
 		try{
+			dbManager = new dbManager();
 			map = new HashMap<String, String>();
-			myWriter = new FileWriter("db.txt");
-			myWriter.write("");
 			serverSocket = new ServerSocket(port);
 			clientSocket = serverSocket.accept();
 			out = new PrintWriter(clientSocket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		}catch(Exception e){
-			e.printStackTrace();
+			System.out.println(e);
+			this.closeSocket();
 		}
 		
 	}
 
-	public void handleRequest(){
+	@Override
+	public void send(String data){
+		out.println(data);
+	}
+
+	@Override
+	public void handleExchange(){
 		Vector<String> v = new Vector<String>();
 
 		try{
 			String line = in.readLine();
 			if(line.equals("KEYWORDS")){
-				String response = "";
-
 				line = in.readLine();
-				System.out.println(line);
-
-				String[] keywords = line.split(" ");
-				myReader = new BufferedReader(new FileReader("db.txt"));
-				
-				String st;
-				while((st = myReader.readLine()) != null){
-					String desc = st.substring(st.indexOf("descriptor=") + 11, st.indexOf(",", st.indexOf("descriptor=") + 1));
-					boolean match = true;
-					for(int i = 0; i < keywords.length; i++){
-						if(!desc.toLowerCase().contains(keywords[i].toLowerCase())){
-							match = false;
-							break;
-						}
-					}
-					if(match){
-						response += desc + " " + st.substring(st.indexOf("address=") + 8, st.indexOf(",")) + "\n";
-					}
-				}
-
-				if(response.trim().isEmpty()){
-					response = "Empty\n";
-				}
-
 				out.flush();
-				out.println(response);
-				out.println("");
+				send(dbManager.searchFromDatabase(line));
+				send("");
 
 			}else{
 
 				if(line != null && !line.isEmpty()){
 					map.put("address", line);
 					line = in.readLine();
-					//System.out.println(line);
 					while(line != null && !line.isEmpty()){
 						v.add(line);
 						line = in.readLine();
@@ -93,30 +67,32 @@ public class dbServerStub{
 					}
 					a += "]";
 					map.put("lines", a);
-					System.out.println(map.toString());
-					myWriter.write(map.toString() + "\n");
-					myWriter.flush();
+					dbManager.writeToDatabase(map.toString() + "\n");
 				}
 			}
 		}catch(Exception e){
 			System.out.println(e);
+			this.closeSocket();
 		}
 	}
 
-	public void close(){
+	@Override
+	public void closeSocket(){
 		try{
 			in.close();
 			out.close();
 			clientSocket.close();
 			serverSocket.close();
-		}catch(Exception e){}
+		}catch(Exception e){
+			System.out.println(e);
+		}
 	}
 
 	public static void main(String[] args){
 
 		dbServerStub s = new dbServerStub(4371);
 		while(true){
-			s.handleRequest();
+			s.handleExchange();
 		}
 
 	}

@@ -3,11 +3,9 @@ import java.awt.event.*;
 import javax.swing.*;
 class gui {
 
-   static boolean a = true;
-
     public static void main(String[] args) {
 
-         ClientStub stub = new ClientStub("127.0.0.1", 4370);
+         ISender stub = new ClientStub("127.0.0.1", 4370);
          //Creates frame to  be shown to user
         JFrame frame = new JFrame("KWIC");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,7 +44,6 @@ class gui {
             public void actionPerformed(ActionEvent e) {
                stub.send("KEYWORDS\n" + textArea.getText().trim());
                keywordArea.setText(stub.getResponse());
-               //System.out.println(stub.getResponse());
             }
          });
 
@@ -62,8 +59,15 @@ class gui {
          reset.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                textArea.setText("");
+               keywordArea.setText("");
+            }
+         });
+
+         resetDB.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
                outputArea.setText("");
                noiseArea.setText("");
+               dbTextArea.setText("");
             }
          });
 

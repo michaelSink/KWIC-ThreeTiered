@@ -2,3 +2,7 @@
 {address=http://www.ou.edu, descriptor=University of Oklahoma, lines=[Oklahoma University of]}
 {address=http://www.asu.edu, descriptor=University Arizona State, lines=[State University Arizona, Arizona State University]}
 {address=http://www.osu.edu, descriptor=University Oklahoma State, lines=[State University Oklahoma, Oklahoma State University]}
+{address=http://www.uco.edu, descriptor=University of Central Oklahoma, lines=[Central Oklahoma University of]}
+{address=http://www.ou.edu, descriptor=University of Oklahoma, lines=[]}
+{address=http://www.asu.edu, descriptor=University Arizona State, lines=[State University Arizona, Arizona State University]}
+{address=http://www.osu.edu, descriptor=University Oklahoma State, lines=[State University Oklahoma]}

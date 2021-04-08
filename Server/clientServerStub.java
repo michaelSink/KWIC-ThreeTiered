@@ -4,14 +4,14 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class clientServerStub {
+public class clientServerStub implements IReceiver{
 
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
 	private BufferedReader in;
-	private MasterController con;
-	private serverDBStub dbStub;
+	private iController con;
+	private ISender dbStub;
 
 	public clientServerStub(int port){
 
@@ -23,16 +23,23 @@ public class clientServerStub {
 			out = new PrintWriter(clientSocket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		}catch(Exception e){
-			e.printStackTrace();
+			System.out.println(e);
+			this.closeSocket();
+			
 		}
 
 	}
 
-	public void handleRequest(){
+	@Override
+	public void send(String data){
+		out.println(data);
+	}
+
+	@Override
+	public void handleExchange(){
 		try{
 			String line = in.readLine();
 			while(line != null){
-				System.out.println(line);
 				if(line.equals("NOISE")){
 					line = in.readLine();
 					con.setNoiseWords(line);
@@ -41,7 +48,6 @@ public class clientServerStub {
 					String response = "";
 					line = in.readLine();
 					while(line != null && !line.isEmpty()){
-						System.out.println(line);
 						String[] text = line.split("[ \t]{2,}");
 						response += text[1] + "\n";
 						con.compute(text[0]);
@@ -51,79 +57,42 @@ public class clientServerStub {
 						line = in.readLine();
 					}
 					out.flush();
-					out.println(response);
+					send(response);
 					break;
 				}else if(line.equals("KEYWORDS")){
 					line = in.readLine();
 					dbStub.send("KEYWORDS" + "\n" + line);
 					String a = dbStub.getResponse();
 					a += dbStub.getResponse();
-					System.out.println("Resp: " + a);
-					out.println(a);
+					send(a);
 					break;
 				}
 				line = in.readLine();
 			}
 		}catch(Exception e){
 			System.out.println(e);
+			this.closeSocket();
 		}
-		// String response = "";
-		// try{
-		// 	String line = in.readLine();
-		// 	if(line.equals("KEYWORDS")){
-		// 		line = in.readLine();
-		// 		dbStub.send("KEYWORDS" + "\n" + line);
-		// 		response += dbStub.getResponse();
-		// 		//System.out.println("Here 2");
-		// 		//System.out.println("Resp: " + response);
-		// 		//out.println("Yes");
-		// 	}else if(line.equals("DB")){
-		// 		line = in.readLine();
-
-		// 		while(line != null && !line.isEmpty()){
-		// 			String[] text = line.split("[ \t]{2,}");
-		// 			response += text[1] + "\n";
-		// 			con.compute(text[0]);
-		// 			String computation = con.getOutput();
-		// 			//dbStub.send(text[1] + "\n" + computation);
-		// 			//System.out.println("DB Output");
-		// 			//System.out.println(dbStub.getResponse());
-		// 			//System.out.println("reading");
-		// 			//response += computation;
-		// 			line = in.readLine();
-		// 		}
-		// 	}else if(line.equals("NOISE")){
-		// 		line = in.readLine();
-		// 		con.setNoiseWords(line);
-		// 		//line = in.readLine();
-		// 		//System.out.println(line);
-		// 	}
-		// 	//in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-		// }catch(Exception e){
-		// 	System.out.println(e);
-		// 	this.close();
-		// }
-
-		// System.out.println("Oi: " + response);
-		// out.println(response);
-		// out.flush();
 		
 	}
 
-	public void close(){
+	@Override
+	public void closeSocket(){
 		try{
 			in.close();
 			out.close();
 			clientSocket.close();
 			serverSocket.close();
-		}catch(Exception e){}
+		}catch(Exception e){
+			System.out.println(e);
+		}
 	}
 
 	public static void main(String[] args){
 
 		clientServerStub s = new clientServerStub(4370);
 		while(true){
-			s.handleRequest();
+			s.handleExchange();
 		}
 
 	}
