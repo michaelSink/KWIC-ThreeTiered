@@ -42,4 +42,9 @@ public class NoiseRemoval implements iNoise{
 		noiseWords.clear();
 	}
 
+	@Override
+	public boolean hasNoiseWord(String word){
+		return noiseWords.contains(word.trim().toLowerCase());
+	}
+
 }

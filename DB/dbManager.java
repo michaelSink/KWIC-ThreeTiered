@@ -22,32 +22,40 @@ public class dbManager implements DBInterface {
 
 		String response = "";
 
-		String[] keywords = line.split(" ");
+		if(!line.isEmpty()){
 
-		try{
-			myReader = new BufferedReader(new FileReader("db.txt"));
+			String[] keywords = line.trim().split(" ");
 
-			String st;
-			while((st = myReader.readLine()) != null){
-				String desc = st.substring(st.indexOf("descriptor=") + 11, st.indexOf(",", st.indexOf("descriptor=") + 1));
-				boolean match = true;
-				for(int i = 0; i < keywords.length; i++){
-					if(!desc.toLowerCase().contains(keywords[i].toLowerCase())){
-						match = false;
-						break;
+			try{
+				myReader = new BufferedReader(new FileReader("db.txt"));
+	
+				String st;
+				while((st = myReader.readLine()) != null){
+					String desc = st.substring(st.indexOf("descriptor=") + 11, st.indexOf(",", st.indexOf("descriptor=") + 1));
+					boolean match = true;
+					for(int i = 0; i < keywords.length; i++){
+						if(!desc.toLowerCase().contains(keywords[i].toLowerCase())){
+							match = false;
+							break;
+						}
+					}
+					if(match){
+						response += desc + " " + st.substring(st.indexOf("address=") + 8, st.indexOf(",")) + "\n";
 					}
 				}
-				if(match){
-					response += desc + " " + st.substring(st.indexOf("address=") + 8, st.indexOf(",")) + "\n";
+		
+				if(response.trim().isEmpty()){
+					response = "Empty\n";
 				}
+			}catch(Exception e){
+				System.out.println(e);
 			}
-	
-			if(response.trim().isEmpty()){
-				response = "Empty\n";
-			}
-		}catch(Exception e){
-			System.out.println(e);
 		}
+
+		if(response.trim().isEmpty()){
+			response = "Empty\n";
+		}
+
 
 		return response;
 	}

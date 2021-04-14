@@ -61,4 +61,9 @@ public class MasterController implements iController{
 		noiseRemoval.resetNoiseWords();
 	}
 
+	@Override
+	public boolean hasNoiseWord(String word){
+		return noiseRemoval.hasNoiseWord(word);
+	}
+
 }

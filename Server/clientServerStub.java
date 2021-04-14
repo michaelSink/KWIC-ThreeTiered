@@ -61,7 +61,17 @@ public class clientServerStub implements IReceiver{
 					break;
 				}else if(line.equals("KEYWORDS")){
 					line = in.readLine();
-					dbStub.send("KEYWORDS" + "\n" + line);
+					String[] keywords = line.split(" ");
+					String keys = "";
+					for(int i = 0; i < keywords.length; i++){
+						if(con.hasNoiseWord(keywords[i])){
+							keywords[i] = "";
+						}
+						if(!keywords[i].isEmpty()){
+							keys += keywords[i] + " ";
+						}
+					}
+					dbStub.send("KEYWORDS" + "\n" + keys.trim());
 					String a = dbStub.getResponse();
 					a += dbStub.getResponse();
 					send(a);
